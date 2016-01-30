@@ -14,9 +14,10 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
 
 
-    <LinearLayout android:orientation="horizontal" android:layout_height="fill_parent" android:layout_width="fill_parent" android:id="@+id/linlayout" android:layout_below="@id/tablayout">
+    <LinearLayout android:orientation="horizontal" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/linlayout" android:layout_below="@id/tablayout">
         <LinearLayout android:layout_weight="1" android:layout_height="fill_parent" android:layout_width="fill_parent">
             <EditText
+                android:id="@+id/input"
                 android:text="Input Address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -30,5 +31,15 @@
             
         </LinearLayout>
     </LinearLayout>
+
+    <com.mapbox.mapboxsdk.views.MapView
+        android:id="@+id/mapview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/linlayout"
+        mapbox:mapid="@string/mapbox_id_street"
+        mapbox:accessToken="@string/testAccessToken"/>
+
+
 
 </RelativeLayout>
