@@ -48,7 +48,11 @@
             android:text="Address"
             android:id="@+id/cAddress"
             android:paddingLeft="10dp"
-            android:paddingRight="10dp" />
+            android:paddingRight="10dp"
+            android:autoText="false"
+            android:clickable="false"
+            android:autoLink="all"
+            android:linksClickable="false" />
     </LinearLayout>
 
 </LinearLayout>

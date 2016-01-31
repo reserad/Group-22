@@ -2,7 +2,10 @@ package com.mapbox.mapboxsdk.android.testapp;
 
 import android.content.Context;
 import android.location.Address;
+import android.location.Criteria;
 import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -11,8 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.overlay.Marker;
 import com.mapbox.mapboxsdk.views.MapView;
@@ -26,23 +29,22 @@ import java.util.Locale;
  */
 public class Navigation extends Fragment implements TabLayout.OnTabSelectedListener{
     private MapView mapView = null;
+    private LatLng lat = null;
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         final View view = inflater.inflate(R.layout.fragment_navigation, container, false);
         Button search = (Button)view.findViewById(R.id.search);
         final EditText input = (EditText)view.findViewById(R.id.input);
         mapView = (MapView) view.findViewById(R.id.mapview);
+        //final TextView navigateHere = (TextView)view.findViewById(R.id.tooltip_navigateHere);
+
         search.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View arg0) {
-                LatLng lat = getLocationFromAddress(view.getContext(), input.getText().toString());
-                Geocoder geocoder;
-                List<Address> addresses = null;
-                geocoder = new Geocoder(view.getContext(), Locale.getDefault());
+                lat = getLocationFromAddress(view.getContext(), input.getText().toString());
+                Geocoder geocoder = new Geocoder(view.getContext(), Locale.getDefault());
                 try {
-                    addresses = geocoder.getFromLocation(lat.getLatitude(), lat.getLongitude(), 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-                    String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                    String city = addresses.get(0).getLocality();
-                    String state = addresses.get(0).getAdminArea();
-                    mapView.addMarker(new Marker(mapView, address, city + ", " + state, lat));
+                    List<Address> addresses = geocoder.getFromLocation(lat.getLatitude(), lat.getLongitude(), 1);
+                    Marker marker = new Marker(mapView, addresses.get(0).getAddressLine(0), addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea(), lat);
+                    mapView.addMarker(marker);
                     mapView.setCenter(lat);
                     mapView.setZoom(14);
                 }
@@ -51,6 +53,24 @@ public class Navigation extends Fragment implements TabLayout.OnTabSelectedListe
                 }
             }
         });
+/*
+        navigateHere.setOnClickListener(new TextView.OnClickListener() {
+            public void onClick(View arg0) {
+                Geocoder geocoder = new Geocoder(view.getContext(), Locale.getDefault());
+                LocationManager service = (LocationManager)     getActivity().getSystemService(getActivity().LOCATION_SERVICE);
+                Criteria criteria = new Criteria();
+                String provider = service.getBestProvider(criteria, false);
+                Location location = service.getLastKnownLocation(provider);
+                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                try {
+                    List<Address> addresses = geocoder.getFromLocation(userLocation.getLatitude(), userLocation.getLongitude(), 1);
+                    mapView.addMarker(new Marker(mapView, addresses.get(0).getAddressLine(0), addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea(), userLocation));
+                }
+                catch(IOException e) {
+                    Toast.makeText(view.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }});*/
+
         mapView.setVisibility(View.VISIBLE);
         return view;
     }

@@ -1,17 +1,24 @@
 package com.example.guilhermecortes.contactmanager;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -141,6 +148,22 @@ public class MainActivity extends Activity {
             ImageView ivContactImage = (ImageView) view.findViewById(R.id.ivContactImage);
             ivContactImage.setImageURI(currentContact.get_imageURI());
 
+            Context context = getContext();
+
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+            if (sharedPrefs.contains("Phone Number"))
+                if(!sharedPrefs.getBoolean("Phone Number", false))
+                    phone.setVisibility(View.GONE);
+
+            if (sharedPrefs.contains("Email"))
+                if(!sharedPrefs.getBoolean("Email", false))
+                    email.setVisibility(View.GONE);
+
+            if (sharedPrefs.contains("Address"))
+                if(!sharedPrefs.getBoolean("Address", false))
+                    address.setVisibility(View.GONE);
+            populateList();
             return view;
         }
     }
@@ -162,6 +185,43 @@ public class MainActivity extends Activity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            final Context context = this;
+            final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+            LayoutInflater li = LayoutInflater.from(this);
+            View promptsView = li.inflate(R.layout.settings, null);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setView(promptsView);
+
+            final CheckBox check_phone = (CheckBox)promptsView.findViewById(R.id.check_phoneNumber);
+            final CheckBox check_email = (CheckBox) promptsView.findViewById(R.id.check_Email);
+            final CheckBox check_address = (CheckBox) promptsView.findViewById(R.id.check_Address);
+
+            if (sharedPrefs.contains("Phone Number"))
+                check_phone.setChecked(sharedPrefs.getBoolean("Phone Number", false));
+
+            if (sharedPrefs.contains("Email"))
+                check_email.setChecked(sharedPrefs.getBoolean("Email", false));
+
+            if (sharedPrefs.contains("Address"))
+                check_address.setChecked(sharedPrefs.getBoolean("Address", false));
+
+            alertDialogBuilder
+                    .setCancelable(false)
+                    .setNegativeButton("Save",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    SharedPreferences.Editor edit = sharedPrefs.edit();
+                                    edit.putBoolean("Phone Number", check_phone.isChecked()).apply();
+                                    edit.putBoolean("Email", check_email.isChecked()).apply();
+                                    edit.putBoolean("Address", check_address.isChecked()).apply();
+                                    populateList();
+                                }
+                            });
+
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+
             return true;
         }
 
