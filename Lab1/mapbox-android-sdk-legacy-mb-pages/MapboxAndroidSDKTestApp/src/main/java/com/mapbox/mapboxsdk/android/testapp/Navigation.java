@@ -41,10 +41,10 @@ public class Navigation extends Fragment implements TabLayout.OnTabSelectedListe
                 try {
                     List<Address> addresses = geocoder.getFromLocation(lat.getLatitude(), lat.getLongitude(), 1);
                     Marker marker = new Marker(mapView, addresses.get(0).getAddressLine(0), addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea(), lat);
-                    marker.setToolTip(new CustomInfoWindow(mapView));
+                    marker.setToolTip(new CustomInfoWindow(mapView, lat));
                     mapView.addMarker(marker);
                     mapView.setCenter(lat);
-                    mapView.setZoom(14);
+                    mapView.setZoom(17);
                 }
                 catch(IOException e){
                     Toast.makeText(view.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();

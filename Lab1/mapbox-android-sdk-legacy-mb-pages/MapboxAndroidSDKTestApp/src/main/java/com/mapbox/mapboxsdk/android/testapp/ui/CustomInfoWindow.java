@@ -6,28 +6,29 @@ import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.location.LocationListener;
 
-import com.mapbox.mapboxsdk.android.testapp.Navigation;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mapbox.mapboxsdk.android.testapp.R;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.overlay.GpsLocationProvider;
 import com.mapbox.mapboxsdk.overlay.Marker;
 import com.mapbox.mapboxsdk.views.InfoWindow;
 import com.mapbox.mapboxsdk.views.MapView;
-import com.mapbox.mapboxsdk.overlay.UserLocationOverlay;
-import java.io.IOException;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
-import java.util.Locale;
 
 public class CustomInfoWindow extends InfoWindow {
     
-    public CustomInfoWindow(final MapView mv) {
+    public CustomInfoWindow(final MapView mv, final LatLng navigateTo) {
         super(R.layout.infowindow_custom, mv);
         
         // Add own OnTouchListener to customize handling InfoWindow touch events
@@ -35,26 +36,54 @@ public class CustomInfoWindow extends InfoWindow {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_UP) {
-                    Toast.makeText(v.getContext(), "hit", Toast.LENGTH_SHORT).show();
-                    UserLocationOverlay userLocation = new UserLocationOverlay(new GpsLocationProvider(v.getContext()), mv);
-                    mv.addMarker(new Marker(mv, "", "", userLocation.getMyLocation()));
+                    Geocoder geocoder;
+                    String bestProvider;
+                    List<Address> user;
+                    user = null;
+                    double lat;
+                    double lng;
 
-                    /*Geocoder geocoder = new Geocoder(v.getContext(), Locale.getDefault());
-                    LocationManager service = (LocationManager) v.getContext().getSystemService(Context.LOCATION_SERVICE);
+                    LocationManager lm = (LocationManager) v.getContext().getSystemService(Context.LOCATION_SERVICE);
+
                     Criteria criteria = new Criteria();
-                    String provider = service.getBestProvider(criteria, false);
-                    service.requestLocationUpdates(provider, 1000, 0, mLocationListener);
-                    Location location = service.getLastKnownLocation(provider);
+                    bestProvider = lm.getBestProvider(criteria, false);
+                    Location location = lm.getLastKnownLocation(bestProvider);
 
-                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                    try {
-                        List<Address> addresses = geocoder.getFromLocation(userLocation.getLatitude(), userLocation.getLongitude(), 1);
-                        mv.addMarker(new Marker(mv, addresses.get(0).getAddressLine(0), addresses.get(0).getLocality() + ", " + addresses.get(0).getAdminArea(), userLocation));
-                    } catch (IOException e) {
-                        Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }*/
+                    if (location == null){
+                        lat = 39.1321095;
+                        lng = -84.5177543;
+                    }else {
+                        geocoder = new Geocoder(v.getContext());
+                        try {
+                            user = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                            lat = (double) user.get(0).getLatitude();
+                            lng = (double) user.get(0).getLongitude();
+                            //navigateTo
+                            //https://api.mapbox.com/v4/directions/mapbox.driving/39.1321095,-84.5177543;39.598322,-84.1787949.json?access_token=pk.eyJ1IjoicmVzZXJhZCIsImEiOiJjaWs4dzdubWgwMHhvdXhrdXN2eTd5djVoIn0.nTcJFOD8ofmioyrjiADLRA
+                            String sURL = "https://api.mapbox.com/v4/directions/mapbox.driving/" + lat + "," + lng + ";" + navigateTo.getLatitude() + "," + navigateTo.getLongitude() + ".json?access_token=pk.eyJ1IjoicmVzZXJhZCIsImEiOiJjaWs4dzdubWgwMHhvdXhrdXN2eTd5djVoIn0.nTcJFOD8ofmioyrjiADLRA";
+                            Toast.makeText(v.getContext(), sURL, Toast.LENGTH_LONG).show();
+                            // Connect to the URL using java's native library
+                            URL url = new URL(sURL);
+                            HttpURLConnection request = (HttpURLConnection) url.openConnection();
+                            request.connect();
 
-                    close();
+                            // Convert to a JSON object to print data
+                            JsonParser jp = new JsonParser(); //from gson
+                            JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
+                            JsonObject rootobj = root.getAsJsonObject(); //May be an array, may be an object.
+                            rootobj = rootobj.get("routes").getAsJsonObject();
+                            Toast.makeText(v.getContext(), "hit1", Toast.LENGTH_LONG).show();
+                            rootobj = rootobj.get("geometry").getAsJsonObject();
+                            Toast.makeText(v.getContext(), "hit2", Toast.LENGTH_LONG).show();
+                            String coords = rootobj.get("coordinates").getAsJsonObject().getAsString();
+                            Toast.makeText(v.getContext(), coords, Toast.LENGTH_LONG).show();
+
+                        } catch (Exception e) {
+                            //Toast.makeText(v.getContext(), e. + " error", Toast.LENGTH_LONG).show();
+                    }
+                    }
+                    //https://api.mapbox.com/geocoding/v5/mapbox.places/.json?access_token=pk.eyJ1IjoicmVzZXJhZCIsImEiOiJjaWs4c214bm8wMDNldXRrb2duMHMxZmhzIn0.IA1KJeoaW33Fhkbw42YJ8Q
+                    //pk.eyJ1IjoicmVzZXJhZCIsImEiOiJjaWs4dzdubWgwMHhvdXhrdXN2eTd5djVoIn0.nTcJFOD8ofmioyrjiADLRA
                 }
                 // Return true as we're done processing this event
                 return true;
@@ -74,26 +103,4 @@ public class CustomInfoWindow extends InfoWindow {
         String description = overlayItem.getDescription();
         ((TextView) mView.findViewById(R.id.customTooltip_Description)).setText(description);
     }
-
-    private final LocationListener mLocationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String s) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String s) {
-
-        }
-    };
 }

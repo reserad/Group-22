@@ -6,14 +6,6 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tablayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
-
-
     <LinearLayout android:orientation="horizontal" android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/linlayout" android:layout_below="@id/tablayout">
         <LinearLayout android:layout_weight="1" android:layout_height="fill_parent" android:layout_width="fill_parent">
             <EditText
