@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,10 +26,8 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class MainActivity extends Activity {
 
@@ -126,7 +125,7 @@ public class MainActivity extends Activity {
 
     private class ContactListAdapter extends ArrayAdapter<Contact>{
         public ContactListAdapter(){
-            super (MainActivity.this, R.layout.listview_item, Contacts);
+            super(MainActivity.this, R.layout.listview_item, Contacts);
         }
 
         //criar função para retornar o emelento do array
@@ -153,21 +152,20 @@ public class MainActivity extends Activity {
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 
             if (sharedPrefs.contains("Phone Number"))
-                if(!sharedPrefs.getBoolean("Phone Number", false))
-                    phone.setVisibility(View.GONE);
+                if(sharedPrefs.getBoolean("Phone Number", false))
+                    phone.setText(Html.fromHtml("<a href = ''>" + currentContact.get_phone() + "</a>"));
 
             if (sharedPrefs.contains("Email"))
-                if(!sharedPrefs.getBoolean("Email", false))
-                    email.setVisibility(View.GONE);
+                if(sharedPrefs.getBoolean("Email", false))
+                    email.setText(Html.fromHtml("<a href = ''>" + currentContact.get_email() + "</a>"));
 
             if (sharedPrefs.contains("Address"))
-                if(!sharedPrefs.getBoolean("Address", false))
-                    address.setVisibility(View.GONE);
+                if(sharedPrefs.getBoolean("Address", false))
+                    address.setText(Html.fromHtml("<a href = ''>" + currentContact.get_address() + "</a>"));
             populateList();
             return view;
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
