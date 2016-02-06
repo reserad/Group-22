@@ -1,6 +1,12 @@
 package com.mapbox.mapboxsdk.android.testapp.ui;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.PointF;
+import android.graphics.Shader;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -11,12 +17,15 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mapbox.mapboxsdk.android.testapp.R;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.overlay.Marker;
+import com.mapbox.mapboxsdk.overlay.Overlay;
+import com.mapbox.mapboxsdk.overlay.PathOverlay;
 import com.mapbox.mapboxsdk.views.InfoWindow;
 import com.mapbox.mapboxsdk.views.MapView;
 
@@ -60,26 +69,29 @@ public class CustomInfoWindow extends InfoWindow {
                             lng = (double) user.get(0).getLongitude();
                             //navigateTo
                             //https://api.mapbox.com/v4/directions/mapbox.driving/39.1321095,-84.5177543;39.598322,-84.1787949.json?access_token=pk.eyJ1IjoicmVzZXJhZCIsImEiOiJjaWs4dzdubWgwMHhvdXhrdXN2eTd5djVoIn0.nTcJFOD8ofmioyrjiADLRA
-                            String sURL = "https://api.mapbox.com/v4/directions/mapbox.driving/" + lat + "," + lng + ";" + navigateTo.getLatitude() + "," + navigateTo.getLongitude() + ".json?access_token=pk.eyJ1IjoicmVzZXJhZCIsImEiOiJjaWs4dzdubWgwMHhvdXhrdXN2eTd5djVoIn0.nTcJFOD8ofmioyrjiADLRA";
-                            Toast.makeText(v.getContext(), sURL, Toast.LENGTH_LONG).show();
+                            String sURL = "https://api.mapbox.com/v4/directions/mapbox.driving/" + lng + "," + lat + ";" + navigateTo.getLongitude() + "," + navigateTo.getLatitude() + ".json?access_token=pk.eyJ1IjoicmVzZXJhZCIsImEiOiJjaWs4dzdubWgwMHhvdXhrdXN2eTd5djVoIn0.nTcJFOD8ofmioyrjiADLRA";
                             // Connect to the URL using java's native library
                             URL url = new URL(sURL);
                             HttpURLConnection request = (HttpURLConnection) url.openConnection();
                             request.connect();
-
-                            // Convert to a JSON object to print data
-                            JsonParser jp = new JsonParser(); //from gson
-                            JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent())); //Convert the input stream to a json element
-                            JsonObject rootobj = root.getAsJsonObject(); //May be an array, may be an object.
-                            rootobj = rootobj.get("routes").getAsJsonObject();
-                            Toast.makeText(v.getContext(), "hit1", Toast.LENGTH_LONG).show();
-                            rootobj = rootobj.get("geometry").getAsJsonObject();
+                            Toast.makeText(v.getContext(), "hit", Toast.LENGTH_LONG).show();
+                            JsonParser jp = new JsonParser();
+                            JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
+                            JsonArray j = root.getAsJsonObject().getAsJsonArray("routes").getAsJsonObject().getAsJsonObject("geometry").getAsJsonArray("coordinates");
                             Toast.makeText(v.getContext(), "hit2", Toast.LENGTH_LONG).show();
-                            String coords = rootobj.get("coordinates").getAsJsonObject().getAsString();
-                            Toast.makeText(v.getContext(), coords, Toast.LENGTH_LONG).show();
+
+                            PathOverlay pathOverlay  = new PathOverlay();
+                            pathOverlay.getPaint().setStyle(Paint.Style.STROKE);
+                            for(final JsonElement type : j) {
+                                JsonArray coords = type.getAsJsonArray();
+                                pathOverlay.addPoint(Double.parseDouble(coords.get(0).toString()), Double.parseDouble(coords.get(1).toString()));
+                            }
+                            Toast.makeText(v.getContext(), "hit3", Toast.LENGTH_LONG).show();
+
+                            mv.addOverlay(pathOverlay);
 
                         } catch (Exception e) {
-                            //Toast.makeText(v.getContext(), e. + " error", Toast.LENGTH_LONG).show();
+                            Toast.makeText(v.getContext(), "error", Toast.LENGTH_LONG).show();
                     }
                     }
                     //https://api.mapbox.com/geocoding/v5/mapbox.places/.json?access_token=pk.eyJ1IjoicmVzZXJhZCIsImEiOiJjaWs4c214bm8wMDNldXRrb2duMHMxZmhzIn0.IA1KJeoaW33Fhkbw42YJ8Q
