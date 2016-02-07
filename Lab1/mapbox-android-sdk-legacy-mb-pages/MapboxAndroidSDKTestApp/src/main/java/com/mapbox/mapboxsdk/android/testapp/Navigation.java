@@ -44,7 +44,7 @@ public class Navigation extends Fragment implements TabLayout.OnTabSelectedListe
                     marker.setToolTip(new CustomInfoWindow(mapView, lat));
                     mapView.addMarker(marker);
                     mapView.setCenter(lat);
-                    mapView.setZoom(17);
+                    mapView.setZoom(18);
                 }
                 catch(IOException e){
                     Toast.makeText(view.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
