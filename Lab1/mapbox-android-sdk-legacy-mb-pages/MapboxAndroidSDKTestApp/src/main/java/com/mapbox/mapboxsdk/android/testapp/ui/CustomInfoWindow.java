@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.mapbox.mapboxsdk.android.testapp.R;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.overlay.Marker;
+import com.mapbox.mapboxsdk.overlay.Overlay;
 import com.mapbox.mapboxsdk.overlay.PathOverlay;
 import com.mapbox.mapboxsdk.views.InfoWindow;
 import com.mapbox.mapboxsdk.views.MapView;
@@ -40,9 +41,9 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 public class CustomInfoWindow extends InfoWindow {
+    double lat, lng;
     public CustomInfoWindow(final MapView mv, final LatLng navigateTo) {
         super(R.layout.infowindow_custom, mv);
-        
         // Add own OnTouchListener to customize handling InfoWindow touch events
         setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -52,7 +53,6 @@ public class CustomInfoWindow extends InfoWindow {
                     Geocoder geocoder;
                     String bestProvider;
                     List<Address> user = null;
-                    double lat, lng;
                     LocationManager lm = (LocationManager) v.getContext().getSystemService(Context.LOCATION_SERVICE);
 
                     Criteria criteria = new Criteria();
@@ -110,35 +110,42 @@ public class CustomInfoWindow extends InfoWindow {
         alertDialog.show();
         double metersToMilesMultiplier = 0.000621371;
         try {
-            int jarrayLength = jsonObject.getJSONArray("routes").length();
-            TableLayout ll = (TableLayout) promptsView.findViewById(R.id.buttonLayout);
-            for (int i = 0; i < jarrayLength; i++) {
+            LinearLayout buttonLayout = (LinearLayout) promptsView.findViewById(R.id.buttonLayout);
+            for (int i = 0; i < jsonObject.getJSONArray("routes").length(); i++) {
                 double distance = Double.parseDouble(jsonObject.getJSONArray("routes").getJSONObject(i).get("distance").toString());
 
-                TableRow.LayoutParams lp = new TableRow.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
-                TableRow tr = new TableRow(promptsView.getContext());
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                LinearLayout nested_li = new LinearLayout(context);
+                nested_li.setOrientation(LinearLayout.HORIZONTAL);
+                nested_li.setLayoutParams(lp);
+                nested_li.setPadding(5,5,5,5);
 
-                TextView tv = new TextView(promptsView.getContext());
+                TextView tv = new TextView(context);
                 tv.setText("Route " + (i + 1));
                 tv.setTextColor(Color.WHITE);
-                tr.addView(tv);
+                tv.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+                nested_li.addView(tv);
 
-                TextView tvMiles = new TextView(promptsView.getContext());
+                TextView tvMiles = new TextView(context);
                 tvMiles.setText(round(distance * metersToMilesMultiplier, 1) + " miles");
                 tvMiles.setTextColor(Color.WHITE);
-                tr.addView(tvMiles);
+                tvMiles.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+                nested_li.addView(tvMiles);
 
-                Button myButton = new Button(promptsView.getContext());
+                Button myButton = new Button(context);
                 myButton.setBackgroundResource(R.color.mapboxGreen);
                 myButton.setText("SELECT");
                 myButton.setTextColor(Color.WHITE);
-                tr.addView(myButton);
+                myButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+                nested_li.addView(myButton);
 
-                ll.addView(tr);
-
+                buttonLayout.addView(nested_li);
                 myButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        for (Overlay o: mv.getOverlays()) {
+                            mv.removeOverlay(o);
+                        }
                         drawLines(mv, context, jsonObject);
                         alertDialog.dismiss();
                     }
@@ -176,7 +183,6 @@ public class CustomInfoWindow extends InfoWindow {
             pathOverlay.getPaint().setStyle(Paint.Style.STROKE);
 
             JSONArray jarray = jsonObject.getJSONArray("routes").getJSONObject(0).getJSONObject("geometry").getJSONArray("coordinates");
-
             for (int i = 0; i < jarray.length(); i++) {
                 JSONArray jo = jarray.getJSONArray(i);
                 pathOverlay.addPoint(Double.parseDouble(jo.get(1).toString()), Double.parseDouble(jo.get(0).toString()));
@@ -186,6 +192,7 @@ public class CustomInfoWindow extends InfoWindow {
             mv.addOverlay(pathOverlay);
 
             mv.setZoom(14);
+            mv.setCenter(new LatLng(lat,lng));
 
         } catch (JSONException e) {
             Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
