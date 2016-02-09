@@ -48,6 +48,7 @@ public class CustomInfoWindow extends InfoWindow {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_UP) {
+                    mv.closeCurrentTooltip();
                     Geocoder geocoder;
                     String bestProvider;
                     List<Address> user = null;
@@ -107,34 +108,30 @@ public class CustomInfoWindow extends InfoWindow {
         alertDialogBuilder.setView(promptsView);
         final AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
-
+        double metersToMilesMultiplier = 0.000621371;
         try {
             int jarrayLength = jsonObject.getJSONArray("routes").length();
-
+            TableLayout ll = (TableLayout) promptsView.findViewById(R.id.buttonLayout);
             for (int i = 0; i < jarrayLength; i++) {
-
                 double distance = Double.parseDouble(jsonObject.getJSONArray("routes").getJSONObject(i).get("distance").toString());
-                double metersToMilesMultiplier = 0.000621371;
 
-                TableLayout ll = (TableLayout) promptsView.findViewById(R.id.buttonLayout);
                 TableRow.LayoutParams lp = new TableRow.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
                 TableRow tr = new TableRow(promptsView.getContext());
-                tr.setLayoutParams(lp);
-                tr.setWeightSum(3);
 
                 TextView tv = new TextView(promptsView.getContext());
                 tv.setText("Route " + (i + 1));
-                tv.setLayoutParams(lp);
+                tv.setTextColor(Color.WHITE);
                 tr.addView(tv);
 
                 TextView tvMiles = new TextView(promptsView.getContext());
                 tvMiles.setText(round(distance * metersToMilesMultiplier, 1) + " miles");
-                tvMiles.setLayoutParams(lp);
+                tvMiles.setTextColor(Color.WHITE);
                 tr.addView(tvMiles);
 
                 Button myButton = new Button(promptsView.getContext());
+                myButton.setBackgroundResource(R.color.mapboxGreen);
                 myButton.setText("SELECT");
-                myButton.setLayoutParams(lp);
+                myButton.setTextColor(Color.WHITE);
                 tr.addView(myButton);
 
                 ll.addView(tr);
@@ -185,7 +182,7 @@ public class CustomInfoWindow extends InfoWindow {
                 pathOverlay.addPoint(Double.parseDouble(jo.get(1).toString()), Double.parseDouble(jo.get(0).toString()));
             }
 
-            pathOverlay.getPaint().setColor(Color.RED);
+            pathOverlay.getPaint().setColor(Color.BLUE);
             mv.addOverlay(pathOverlay);
 
             mv.setZoom(14);

@@ -5,10 +5,32 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TableLayout
-        android:id="@+id/buttonLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </TableLayout>
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#3d455b"
+        android:layout_alignParentLeft="true" >
 
+        <HorizontalScrollView
+            android:id="@+id/hscrll1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <RelativeLayout
+                android:id="@+id/RelativeLayout1"
+                android:layout_width="fill_parent"
+                android:layout_gravity="center"
+                android:layout_height="fill_parent"
+                android:orientation="vertical" >
+
+                <TableLayout
+                    android:id="@+id/buttonLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true" >
+                </TableLayout>
+            </RelativeLayout>
+        </HorizontalScrollView>
+    </ScrollView>
 </LinearLayout>
