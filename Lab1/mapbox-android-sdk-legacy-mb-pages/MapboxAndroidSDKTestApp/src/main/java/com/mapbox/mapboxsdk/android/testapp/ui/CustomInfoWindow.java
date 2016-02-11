@@ -59,42 +59,44 @@ public class CustomInfoWindow extends InfoWindow {
                     bestProvider = lm.getBestProvider(criteria, false);
                     Location location = lm.getLastKnownLocation(bestProvider);
 
-                    if (location == null) {
-                        lat = 39.1321095;
-                        lng = -84.5177543;
-                    } else {
-                        geocoder = new Geocoder(v.getContext());
-                        try {
-                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                            StrictMode.setThreadPolicy(policy);
+                    geocoder = new Geocoder(v.getContext());
+                    try {
+                        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                        StrictMode.setThreadPolicy(policy);
 
+                        if (location == null) {
+                            lat = 39.1321095;
+                            lng = -84.5177543;
+                            mv.addMarker(new Marker(mv, "University of Cincinnati", "Cincinnati" + ", " + "Ohio", new LatLng(lat, lng)));
+                        }
+                        else {
                             user = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                             lat = (double) user.get(0).getLatitude();
                             lng = (double) user.get(0).getLongitude();
-
                             mv.addMarker(new Marker(mv, user.get(0).getAddressLine(0), user.get(0).getLocality() + ", " + user.get(0).getAdminArea(), new LatLng(lat, lng)));
-
-                            String sURL = "https://api.mapbox.com/v4/directions/mapbox.driving/" + lng + "," + lat + ";" + navigateTo.getLongitude() + "," + navigateTo.getLatitude() + ".json?access_token=pk.eyJ1IjoicmVzZXJhZCIsImEiOiJjaWs4dzdubWgwMHhvdXhrdXN2eTd5djVoIn0.nTcJFOD8ofmioyrjiADLRA";
-
-                            URL url = new URL(sURL);
-                            HttpURLConnection request = (HttpURLConnection) url.openConnection();
-                            request.setRequestMethod("GET");
-                            request.setRequestProperty("Content-length", "0");
-                            request.setUseCaches(false);
-                            request.setAllowUserInteraction(false);
-                            request.connect();
-
-                            JSONObject jsonObject = null;
-                            jsonObject = readJsonFromUrl(sURL);
-                            displayRoutes(mv, v.getContext(), jsonObject);
-
-                        } catch (IOException e) {
-                            Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                        } catch (JSONException e) {
-                            Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                         }
+
+                        String sURL = "https://api.mapbox.com/v4/directions/mapbox.driving/" + lng + "," + lat + ";" + navigateTo.getLongitude() + "," + navigateTo.getLatitude() + ".json?access_token=pk.eyJ1IjoicmVzZXJhZCIsImEiOiJjaWs4dzdubWgwMHhvdXhrdXN2eTd5djVoIn0.nTcJFOD8ofmioyrjiADLRA";
+
+                        URL url = new URL(sURL);
+                        HttpURLConnection request = (HttpURLConnection) url.openConnection();
+                        request.setRequestMethod("GET");
+                        request.setRequestProperty("Content-length", "0");
+                        request.setUseCaches(false);
+                        request.setAllowUserInteraction(false);
+                        request.connect();
+
+                        JSONObject jsonObject = null;
+                        jsonObject = readJsonFromUrl(sURL);
+                        displayRoutes(mv, v.getContext(), jsonObject);
+
+                    } catch (IOException e) {
+                        Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    } catch (JSONException e) {
+                        Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 }
+
                 // Return true as we're done processing this event
                 return true;
             }
