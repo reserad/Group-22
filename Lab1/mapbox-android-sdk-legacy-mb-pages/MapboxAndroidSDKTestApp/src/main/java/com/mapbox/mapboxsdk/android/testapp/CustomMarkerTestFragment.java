@@ -31,7 +31,7 @@ public class CustomMarkerTestFragment extends Fragment {
         mv.addMarker(capital);
 
         Marker bigCity = new Marker(mv, "Dar es Salaam", "", new LatLng(-6.80610, 39.27046));
-        bigCity.setToolTip(new CustomInfoWindow(mv));
+        bigCity.setToolTip(new CustomInfoWindow(mv, new LatLng(-6.80610, 39.27046)));
         mv.addMarker(bigCity);
 
         return view;
