@@ -13,12 +13,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.mapbox.mapboxsdk.android.testapp.ui.CustomInfoWindow;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.overlay.Marker;
 import com.mapbox.mapboxsdk.views.MapView;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -40,8 +38,8 @@ public class Navigation extends Fragment implements TabLayout.OnTabSelectedListe
                 mapView.clear();
                 try {
                     if (getActivity().getCurrentFocus() != null) {
-                        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
                     }
                     lat = getLocationFromAddress(view.getContext(), input.getText().toString());
                     Geocoder geocoder = new Geocoder(view.getContext(), Locale.getDefault());
@@ -61,38 +59,28 @@ public class Navigation extends Fragment implements TabLayout.OnTabSelectedListe
         });
         return view;
     }
-    public void onTabSelected(final TabLayout.Tab tab) {
-    }
+    public void onTabSelected(final TabLayout.Tab tab) { }
 
     @Override
-    public void onTabUnselected(final TabLayout.Tab tab) {
-
-    }
+    public void onTabUnselected(final TabLayout.Tab tab) { }
 
     @Override
-    public void onTabReselected(final TabLayout.Tab tab) {
+    public void onTabReselected(final TabLayout.Tab tab) { }
 
-    }
-
-    public LatLng getLocationFromAddress(Context context,String strAddress) {
+    private LatLng getLocationFromAddress(Context context,String strAddress) {
         Geocoder coder = new Geocoder(context);
         List<Address> address;
-        LatLng p1 = null;
-
+        LatLng latLng = null;
         try {
             address = coder.getFromLocationName(strAddress, 5);
             if (address == null) {
                 return null;
             }
             Address location = address.get(0);
-            location.getLatitude();
-            location.getLongitude();
-
-            p1 = new LatLng(location.getLatitude(), location.getLongitude() );
-
+            latLng = new LatLng(location.getLatitude(), location.getLongitude() );
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return p1;
+        return latLng;
     }
 }
