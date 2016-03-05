@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import java.io.BufferedReader;
 import java.io.Reader;
+
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.location.Address;
@@ -41,6 +43,7 @@ public class CustomInfoWindow extends InfoWindow {
     public CustomInfoWindow(final MapView mapView, final LatLng navigateTo) {
         super(R.layout.infowindow_custom, mapView);
         TextView textView = (TextView) getView().findViewById(R.id.customTooltip_Navigate);
+
         textView.setOnClickListener(new TextView.OnClickListener() {
             @Override
             public void onClick(View arg0) {
@@ -60,14 +63,19 @@ public class CustomInfoWindow extends InfoWindow {
                     StrictMode.setThreadPolicy(policy);
 
                     if (location == null) {
-                        mapView.addMarker(new Marker(mapView, "University of Cincinnati", "Cincinnati" + ", " + "Ohio", new LatLng(39.1321095, -84.5177543)));
+                        lat = 39.1321095;
+                        lng = -84.5177543;
+                        mapView.addMarker(new Marker(mapView, "University of Cincinnati", "Cincinnati" + ", " + "Ohio", new LatLng(lat, lng)));
                     } else {
                         user = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                        mapView.addMarker(new Marker(mapView, user.get(0).getAddressLine(0), user.get(0).getLocality() + ", " + user.get(0).getAdminArea(), new LatLng(user.get(0).getLatitude(), user.get(0).getLongitude())));
+                        lat = (double) user.get(0).getLatitude();
+                        lng = (double) user.get(0).getLongitude();
+                        mapView.addMarker(new Marker(mapView, user.get(0).getAddressLine(0), user.get(0).getLocality() + ", " + user.get(0).getAdminArea(), new LatLng(lat, lng)));
                     }
 
                     String sURL = "https://api.mapbox.com/v4/directions/mapbox.driving/" + lng + "," + lat + ";" + navigateTo.getLongitude() + "," + navigateTo.getLatitude() + ".json?access_token=pk.eyJ1IjoicmVzZXJhZCIsImEiOiJjaWs4dzdubWgwMHhvdXhrdXN2eTd5djVoIn0.nTcJFOD8ofmioyrjiADLRA";
-                    displayRoutes(mapView, getView().getContext(), getJsonObject(sURL));
+                    JSONObject jsonObject = getJsonObject(sURL);
+                    displayRoutes(mapView, getView().getContext(), jsonObject);
 
                 } catch (IOException | JSONException e) {
                     Toast.makeText(getView().getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
@@ -98,7 +106,6 @@ public class CustomInfoWindow extends InfoWindow {
             LinearLayout buttonLayout = (LinearLayout) promptsView.findViewById(R.id.buttonLayout);
             for (int i = 0; i < jsonObject.getJSONArray("routes").length(); i++) {
                 double distance = Double.parseDouble(jsonObject.getJSONArray("routes").getJSONObject(i).get("distance").toString());
-
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 LinearLayout nested_li = new LinearLayout(context);
                 nested_li.setOrientation(LinearLayout.HORIZONTAL);

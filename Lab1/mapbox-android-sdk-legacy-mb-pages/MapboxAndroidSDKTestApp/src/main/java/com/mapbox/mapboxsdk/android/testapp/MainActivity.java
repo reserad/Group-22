@@ -1,5 +1,6 @@
 package com.mapbox.mapboxsdk.android.testapp;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -12,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -20,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	private NavigationView        mNavigationView;
 	private Menu                  testFragmentNames;
 	private int selectedFragmentIndex = 0;
+    private String title;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -184,6 +188,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	public boolean onNavigationItemSelected(final MenuItem menuItem) {
 		selectItem(menuItem.getItemId());
 		return true;
+	}
+
+    public void initiateTransfer(View v) {
+        TextView tooltipTitle = (TextView)v.findViewById(R.id.customTooltip_title);
+
+        Bundle args = new Bundle();
+        title = tooltipTitle.getText().toString();
+        args.putString("Address", title);
+
+        Fragment fragment = new SendFragment();
+        fragment.setArguments(args);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+    }
+
+	public void addToContact(View view) {
+		Intent intent = new Intent(Intent.ACTION_SEND);
+		intent.setType("text/plain");
+
+        String data = title + "," + "Morgan Freeman" + "," + "867-5309";
+
+		intent.putExtra(Intent.EXTRA_TEXT, data);
+		startActivity(intent);
 	}
 
 	@Override

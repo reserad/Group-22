@@ -33,7 +33,7 @@ public class MainActivity extends Activity {
 
     private EditText nameTxt, phoneTxt, emailTxt, addressTxt;
     ImageView contactImageImgView;
-    List<Contact> Contacts = new ArrayList<Contact>();
+    static List<Contact> Contacts = new ArrayList<Contact>();
     ListView contactListView;
     Uri imageURI = null;
 
@@ -63,8 +63,23 @@ public class MainActivity extends Activity {
         tabSpec.setIndicator("List");
         tabHost.addTab(tabSpec);
 
-
         final Button addBtn = (Button) findViewById(R.id.btnAdd);
+
+        Intent intent = getIntent();
+        String type = intent.getType();
+        String action = intent.getAction();
+
+        if(Intent.ACTION_SEND.equals(action) && type != null) {
+            if (type.equals("text/plain")) {
+                String data = intent.getStringExtra(Intent.EXTRA_TEXT);
+                String[] dataArray = data.split(",");
+                nameTxt.setText(dataArray[1]);
+                phoneTxt.setText(dataArray[2]);
+                addressTxt.setText(dataArray[0]);
+                addBtn.setEnabled(!nameTxt.getText().toString().trim().isEmpty());
+            }
+        }
+
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
