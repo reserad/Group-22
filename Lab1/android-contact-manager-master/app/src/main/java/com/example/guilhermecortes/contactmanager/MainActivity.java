@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
                 nameTxt.setText(dataArray[1]);
                 phoneTxt.setText(dataArray[2]);
                 addressTxt.setText(dataArray[0]);
-                addBtn.setEnabled(!nameTxt.getText().toString().trim().isEmpty());
+                addBtn.setEnabled(true);
             }
         }
 
