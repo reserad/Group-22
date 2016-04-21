@@ -1,8 +1,11 @@
 package com.mapbox.mapboxsdk.android.testapp;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Trace;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -11,10 +14,15 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -24,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	private Menu                  testFragmentNames;
 	private int selectedFragmentIndex = 0;
     private String title;
+	private static final int INVALID  = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +41,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		   MapView.setDebugMode(true); //make sure to call this before the view is created!
            */
 		setContentView(R.layout.activity_main);
+
+		SignatureVerify signatureVerifier = new SignatureVerify();
+
+		int verification = signatureVerifier.checkSignature(this);
+
+		if (verification == INVALID){
+			Toast toast = Toast.makeText(this,"The signature of this application cannot be verified." +
+					"Warning: The data in the application might have been tampered with.",Toast.LENGTH_LONG);
+
+			toast.show();
+		}
+
 
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
@@ -190,11 +211,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		return true;
 	}
 
-    public void initiateTransfer(View v) {
+    public void initiateTransfer(View v) throws Exception {
         TextView tooltipTitle = (TextView)v.findViewById(R.id.customTooltip_title);
 
         Bundle args = new Bundle();
         title = tooltipTitle.getText().toString();
+		AppSecurity appSecurity = new AppSecurity();
         args.putString("Address", title);
 
         Fragment fragment = new SendFragment();
@@ -203,13 +225,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 
-	public void addToContact(View view) {
+	public void addToContact(View view) throws Exception {
+		AppSecurity appSecurity = new AppSecurity();
 		Intent intent = new Intent(Intent.ACTION_SEND);
 		intent.setType("text/plain");
 
         String data = title + "," + "Morgan Freeman" + "," + "867-5309";
-
-		intent.putExtra(Intent.EXTRA_TEXT, data);
+		intent.putExtra(Intent.EXTRA_TEXT, appSecurity.Encrypt(data) + "---" + AppSecurity.generateMac("TEST", data));
 		startActivity(intent);
 	}
 

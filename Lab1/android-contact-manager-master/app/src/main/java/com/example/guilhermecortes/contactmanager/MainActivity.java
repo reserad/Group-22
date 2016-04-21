@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,11 +37,18 @@ public class MainActivity extends Activity {
     static List<Contact> Contacts = new ArrayList<Contact>();
     ListView contactListView;
     Uri imageURI = null;
+    private static final int INVALID = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        int verification = SignatureVerify.checkSignature(this);
+        if (verification == INVALID){
+            Toast.makeText(this,"The signature of this application cannot be verified." +
+                    "Warning: The data in the application might have been tampered with.",Toast.LENGTH_LONG).show();
+        }
 
         nameTxt = (EditText) findViewById(R.id.txtName);
         phoneTxt = (EditText) findViewById(R.id.txtPhone);
@@ -71,11 +79,28 @@ public class MainActivity extends Activity {
 
         if(Intent.ACTION_SEND.equals(action) && type != null) {
             if (type.equals("text/plain")) {
-                String data = intent.getStringExtra(Intent.EXTRA_TEXT);
-                String[] dataArray = data.split(",");
-                nameTxt.setText(dataArray[1]);
-                phoneTxt.setText(dataArray[2]);
-                addressTxt.setText(dataArray[0]);
+                String[] data = intent.getStringExtra(Intent.EXTRA_TEXT).split("---");
+
+                try
+                {
+                    data[0] = AppSecurity.Decrypt(data[0]);
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+
+                if(AppSecurity.generateMac("TEST", data[0]).equals(data[1]))
+                {
+                    try {
+                        String[] dataArray = data[0].split(",");
+                        nameTxt.setText(dataArray[1]);
+                        phoneTxt.setText(dataArray[2]);
+                        addressTxt.setText(dataArray[0]);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
                 addBtn.setEnabled(true);
             }
         }
