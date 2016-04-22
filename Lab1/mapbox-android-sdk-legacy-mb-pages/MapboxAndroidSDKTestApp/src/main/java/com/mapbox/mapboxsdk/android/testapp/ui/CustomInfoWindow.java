@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import java.io.BufferedReader;
 import java.io.Reader;
-
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.location.Address;
@@ -58,15 +56,19 @@ public class CustomInfoWindow extends InfoWindow {
                 Location location = locationManager.getLastKnownLocation(bestProvider);
 
                 geocoder = new Geocoder(getView().getContext());
-                try {
+                try
+                {
                     StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                     StrictMode.setThreadPolicy(policy);
 
-                    if (location == null) {
+                    if (location == null)
+                    {
                         lat = 39.1321095;
                         lng = -84.5177543;
                         mapView.addMarker(new Marker(mapView, "University of Cincinnati", "Cincinnati" + ", " + "Ohio", new LatLng(lat, lng)));
-                    } else {
+                    }
+                    else
+                    {
                         user = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                         lat = (double) user.get(0).getLatitude();
                         lng = (double) user.get(0).getLongitude();
@@ -77,7 +79,9 @@ public class CustomInfoWindow extends InfoWindow {
                     JSONObject jsonObject = getJsonObject(sURL);
                     displayRoutes(mapView, getView().getContext(), jsonObject);
 
-                } catch (IOException | JSONException e) {
+                }
+                catch (IOException | JSONException e)
+                {
                     Toast.makeText(getView().getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             }

@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.util.Base64;
+import android.util.Log;
 
 import java.security.MessageDigest;
 
@@ -16,7 +17,7 @@ public class SignatureVerify
 {
     private static final int VALID = 0;
     private static final int INVALID = 1;
-    private static final String SIGNATURE = "651273345";
+    private static final String SIGNATURE = "sA+HrPBYed/m5lt45CJFBTslxJw=";
 
     public static int checkSignature(Context context)
     {
@@ -29,7 +30,8 @@ public class SignatureVerify
                 MessageDigest md = MessageDigest.getInstance("SHA");
                 md.update(signature.toByteArray());
                 final String currentSignature = Base64.encodeToString(md.digest(), Base64.DEFAULT);
-                if (SIGNATURE.equals(currentSignature))
+
+                if (SIGNATURE.trim().equals(currentSignature.trim()))
                     return VALID;
             }
         }
